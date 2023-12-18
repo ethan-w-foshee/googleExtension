@@ -10,7 +10,7 @@ async function getCurrentTab() {
   return tab;
 }
 
-chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
   url = tabs[0].url;
   title = tabs[0].title;
 });
@@ -26,8 +26,16 @@ function displayBookmarks(nodes, parentNode) {
     // If the node is a bookmark, create a list item and append it to the parent node
     if (node.url) {
       const listItem = document.createElement('li');
+      const listLink = document.createElement('a');
+      const urlLink = document.createElement('a');
+      urlLink.href = node.url;
+      urlLink.textContent = node.url;
+      listLink.href = node.url;
+      listLink.target = "_blank"
       listItem.textContent = node.title;
-      parentNode.appendChild(listItem);
+      listLink.appendChild(listItem);
+      listLink.appendChild(urlLink)
+      parentNode.appendChild(listLink);
     }
 
     // If the node has children, recursively display them
@@ -48,7 +56,6 @@ function addBookmark() {
       url: url
     },
     () => {
-      console.log('Bookmark added');
       location.reload(); // Refresh the popup
     }
   );
@@ -68,6 +75,9 @@ function removeBookmark() {
 
 // Add click event listeners to the buttons
 document.getElementById('addButton').addEventListener('click', addBookmark);
-document
-  .getElementById('removeButton')
-  .addEventListener('click', removeBookmark);
+document.getElementById('removeButton').addEventListener('click', removeBookmark);
+document.getElementById('newTab').addEventListener('click', newTab)
+
+function newTab() {
+  chrome.tabs.create({ url: './tab.html' });
+}

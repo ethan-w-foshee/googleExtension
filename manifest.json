@@ -1,14 +1,19 @@
 {
-    "manifest_version": 3,
-    "name": "Bookmark Organizer",
-    "version": "1.0",
-    "description": "Ethan's first try at making an extension for Sam.",
-    "action": {
-      "default_popup": "popup.html",
-      "default_icon": "./images/icon.png"
-    },
-    "permissions": [
-        "bookmarks",
-        "activeTab"
-    ]
-  }
+  "manifest_version": 3,
+  "name": "Bookmark Organizer",
+  "version": "1.0",
+  "description": "Ethan's first try at making an extension for Sam.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "./images/icon.png"
+  },
+  "permissions": [
+    "bookmarks",
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}
