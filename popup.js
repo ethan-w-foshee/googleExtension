@@ -25,16 +25,15 @@ function displayBookmarks(nodes, parentNode) {
   for (const node of nodes) {
     // If the node is a bookmark, create a list item and append it to the parent node
     if (node.url) {
+      updateStorage(node)
       const listItem = document.createElement('li');
       const listLink = document.createElement('a');
-      const urlLink = document.createElement('a');
-      urlLink.href = node.url;
-      urlLink.textContent = node.url;
+      // Set some attributes
       listLink.href = node.url;
       listLink.target = "_blank"
       listItem.textContent = node.title;
+      // Append the child
       listLink.appendChild(listItem);
-      listLink.appendChild(urlLink)
       parentNode.appendChild(listLink);
     }
 
@@ -80,4 +79,21 @@ document.getElementById('newTab').addEventListener('click', newTab)
 
 function newTab() {
   chrome.tabs.create({ url: './tab.html' });
+}
+
+async function updateStorage(bookmark) {
+  // console.log(bookmark)
+  let bookmark_id = bookmark.id
+  let bookmarkListStore = await chrome.storage.sync.get("bookmarkListStore");
+  if (typeof (bookmarkListStore.bookmarkListStore) === Array) {
+    bookmarkListStore.push(bookmark_id);
+    await chrome.storage.sync.set({ "bookmarkListStore": bookmarkListStore });
+    await chrome.storage.sync.set({ bookmark_id: bookmark_data })
+  }
+  else {
+    await chrome.storage.sync.set({ "bookmarkListStore": [0, 1] });
+    console.log(typeof(bookmarkListStore.bookmarkListStore))
+    console.log(bookmarkListStore.bookmarkListStore)
+  }
+  chrome.storage.sync.get("bookmarkListStore", (result) => {console.log(typeof(result.bookmarkListStore))})
 }

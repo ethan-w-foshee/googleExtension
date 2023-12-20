@@ -2,6 +2,7 @@
 // Get the bookmarks and display them in the popup
 let url
 let title
+let bookmarkListStore = await chrome.storage.sync.get("bookmarkListStore");
 
 async function getCurrentTab() {
     let queryOptions = { active: true, lastFocusedWindow: true };
@@ -25,6 +26,8 @@ function displayBookmarks(nodes, parentNode) {
     for (const node of nodes) {
         // If the node is a bookmark, create a list item and append it to the parent node
         if (node.url) {
+            console.log(bookmarkListStore.bookmarkListStore)
+            console.log(typeof(bookmarkListStore.bookmarkListStore))
             // Create the elements needed
             const listItem = document.createElement('li');
             const listText = document.createElement('span');
