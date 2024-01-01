@@ -7,14 +7,24 @@
     "default_popup": "popup.html",
     "default_icon": "./images/icon.png"
   },
+  "commands": {
+    "add-bookmark": {
+      "suggested_key": "Ctrl+Shift+K",
+      "description": "Inject a script on the page"
+    }
+  },
   "permissions": [
     "bookmarks",
     "activeTab",
     "tabs",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "host_permissions": [
     "http://*/*",
     "https://*/*"
-  ]
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  }
 }

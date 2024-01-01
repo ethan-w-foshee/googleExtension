@@ -25,7 +25,7 @@ function displayBookmarks(nodes, parentNode) {
   for (const node of nodes) {
     // If the node is a bookmark, create a list item and append it to the parent node
     if (node.url) {
-      updateStorage(node)
+      updateStorage(nodes)
       const listItem = document.createElement('li');
       const listLink = document.createElement('a');
       // Set some attributes
@@ -82,18 +82,20 @@ function newTab() {
 }
 
 async function updateStorage(bookmark) {
-  // console.log(bookmark)
   let bookmark_id = bookmark.id
-  let bookmarkListStore = await chrome.storage.sync.get("bookmarkListStore");
-  if (typeof (bookmarkListStore.bookmarkListStore) === Array) {
+  let bookmarkListStore
+  chrome.storage.sync.get('bookmarkListStore', function(bmks) {
+    // check if data exists.
+    if (bmks) {
+        bookmarkListStore = bmks.bookmarkListStore;
+    }
+  });
+  if (Array.isArray(bookmarkListStore)) {
     bookmarkListStore.push(bookmark_id);
     await chrome.storage.sync.set({ "bookmarkListStore": bookmarkListStore });
     await chrome.storage.sync.set({ bookmark_id: bookmark_data })
   }
   else {
-    await chrome.storage.sync.set({ "bookmarkListStore": [0, 1] });
-    console.log(typeof(bookmarkListStore.bookmarkListStore))
-    console.log(bookmarkListStore.bookmarkListStore)
+    await chrome.storage.sync.set({ "bookmarkListStore": bookmark });
   }
-  chrome.storage.sync.get("bookmarkListStore", (result) => {console.log(typeof(result.bookmarkListStore))})
 }
