@@ -1,5 +1,4 @@
-let bookmarkListStore
-let url
+importScripts("./foo.js")
 
 chrome.storage.sync.get('bookmarkListStore', function (bmks) {
     // check if data exists.
@@ -8,22 +7,19 @@ chrome.storage.sync.get('bookmarkListStore', function (bmks) {
     }
 });
 
+
+
 // Keybind command
 chrome.commands.onCommand.addListener((command) => {
-    storeStuff()
+    if (command === "add-bookmark") {
+        getCurrentTab()
+        chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+            url = tabs[0].url;
+            title = tabs[0].title;
+            addBookmark()
+        });
+    }
+    if (command === "open-manager") {
+        newTab()
+    }
 });
-
-function storeStuff() {
-    chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-        url = tabs[0].url;
-    });
-    popupCenter()
-}
-
-function popupCenter() {
-    let height = 200
-    let width = 350
-    let left = 250
-    let top = 50
-    chrome.tabs.create({ url: './popup.html', type: "popup" });
-}

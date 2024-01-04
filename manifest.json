@@ -11,6 +11,10 @@
     "add-bookmark": {
       "suggested_key": "Ctrl+Shift+K",
       "description": "Inject a script on the page"
+    },
+    "open-manager": {
+      "suggested_key": "Ctrl+Shift+L",
+      "description": "Used to open the tab list of bookmarks"
     }
   },
   "permissions": [
