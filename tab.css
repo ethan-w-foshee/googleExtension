@@ -12,9 +12,16 @@ li {
   padding: 0.25rem;
 }
 
-#urlLink {
+.urlLink {
   float: right;
   margin-right: 1%;
+}
+
+.delButton {
+  display: inline-block;
+  position: relative;
+  padding: 0%;
+  margin-left: 2%;
 }
 
 li:nth-child(odd) {
@@ -30,10 +37,6 @@ p {
   margin: 0;
 }
 
-#hidden {
+.hidden {
   display: none;
-}
-
-#shown {
-  /* Nothing to see here */
 }

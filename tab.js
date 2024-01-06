@@ -3,6 +3,7 @@
 let url
 let title
 let bookmarkListStore
+const bookmarkList = document.getElementById('bookmarkList');
 
 chrome.storage.sync.get('bookmarkListStore', function(bmks) {
     // check if data exists.
@@ -11,48 +12,48 @@ chrome.storage.sync.get('bookmarkListStore', function(bmks) {
     }
   });
 
-async function getCurrentTab() {
-    let queryOptions = { active: true, lastFocusedWindow: true };
-    // `tab` will either be a `tabs.Tab` instance or `undefined`.
-    let [tab] = await chrome.tabs.query(queryOptions);
-    return tab;
-}
-
-chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-    url = tabs[0].url;
-    title = tabs[0].title;
-});
-
 chrome.bookmarks.getTree((tree) => {
-    const bookmarkList = document.getElementById('bookmarkList');
+   
     displayBookmarks(tree[0].children, bookmarkList);
 });
 
 // Recursively display the bookmarks
 function displayBookmarks(nodes, parentNode) {
+    let i = 0
     for (const node of nodes) {
         // If the node is a bookmark, create a list item and append it to the parent node
         if (node.url) {
             // Create the elements needed
             const listItem = document.createElement('li');
             const listText = document.createElement('span');
+            const delButton = document.createElement('button');
             const urlLink = document.createElement('a');
             // Give them CSS identifiers
-            listText.id = "listText"
-            urlLink.id = "urlLink"
+            listText.className = "listText"
+            urlLink.className = "urlLink"
             listItem.className = ""
+            delButton.className = "delButton"
             // Assign the URL settings
             urlLink.href = node.url;
             urlLink.textContent = node.url;
             // Assign the title
             listText.textContent = node.title;
+            // Create the button
+            delButton.textContent = "Delete";
+            delButton.addEventListener('click', deleteBookmark)
             // Append the children to the list item
             listItem.appendChild(listText);
+            listItem.appendChild(delButton);
             listItem.appendChild(urlLink);
             // Add the list item to the list
             parentNode.appendChild(listItem);
+            // Give the list item a id for distinction
+            listItem.setAttribute('id', `${i}`)
+            urlLink.setAttribute('id', `${i}`)
+            // Iterate variable for id
+            i = i + 1;
         }
-
+        
         // If the node has children, recursively display them
         if (node.children) {
             const sublist = document.createElement('ul');
@@ -63,7 +64,7 @@ function displayBookmarks(nodes, parentNode) {
     }
 }
 
-// Add click event listeners to the buttons
+// Add filter function to filter bar
 document.getElementById('filterBy').addEventListener('keyup', filter)
 
 function filter(input) {
@@ -71,18 +72,27 @@ function filter(input) {
     let bookList = document.getElementById("bookList")
     if (filterSort != "") {
         for (let i = 0; i < bookList.children.length; i++) {
-            bookList.children[i].setAttribute('id', 'hidden')
+            bookList.children[i].setAttribute('class', 'hidden')
         }
         let filteredArray = document.querySelectorAll(`[class*=${filterSort}]`)
         for (let i = 0; i < filteredArray.length; i++) {
-            filteredArray[i].setAttribute('id', 'shown')
+            filteredArray[i].setAttribute('class', '')
         }
     }
     else {
         for (let i = 0; i < bookList.children.length; i++) {
-            bookList.children[i].setAttribute('id', 'shown')
+            bookList.children[i].setAttribute('class', '')
         }
     }
 }
-
- 
+function deleteBookmark() {
+    console.log(this.parentNode.children[2].href)
+    chrome.bookmarks.search({ url: url }, (results) => {
+        for (const result of results) {
+          if (result.url === this.parentNode.children[2].href) {
+            chrome.bookmarks.remove(result.id, () => { });
+          }
+        }
+        location.reload();
+      });
+}
