@@ -5,15 +5,15 @@ let title
 let bookmarkListStore
 const bookmarkList = document.getElementById('bookmarkList');
 
-chrome.storage.sync.get('bookmarkListStore', function(bmks) {
+chrome.storage.sync.get('bookmarkListStore', function (bmks) {
     // check if data exists.
     if (bmks) {
         bookmarkListStore = bmks.bookmarkListStore;
+        console.log(bookmarkListStore)
     }
-  });
+});
 
 chrome.bookmarks.getTree((tree) => {
-   
     displayBookmarks(tree[0].children, bookmarkList);
 });
 
@@ -28,11 +28,13 @@ function displayBookmarks(nodes, parentNode) {
             const listText = document.createElement('span');
             const delButton = document.createElement('button');
             const urlLink = document.createElement('a');
+            const tagList = document.createElement('span')
             // Give them CSS identifiers
-            listText.className = "listText"
-            urlLink.className = "urlLink"
-            listItem.className = ""
-            delButton.className = "delButton"
+            listText.className = "listText";
+            urlLink.className = "urlLink";
+            listItem.className = "";
+            delButton.className = "delButton";
+            tagList.className = "tagList";
             // Assign the URL settings
             urlLink.href = node.url;
             urlLink.textContent = node.url;
@@ -40,26 +42,22 @@ function displayBookmarks(nodes, parentNode) {
             listText.textContent = node.title;
             // Create the button
             delButton.textContent = "Delete";
-            delButton.addEventListener('click', deleteBookmark)
+            delButton.addEventListener('click', deleteBookmark);
+            // Create the tag list, and populate it
+            tagList.innerText = node.tags
+            listItem.setAttribute('class', `${tagList.innerHTML}`)
             // Append the children to the list item
-            listItem.appendChild(listText);
             listItem.appendChild(delButton);
+            listItem.appendChild(listText);
+            listItem.appendChild(tagList);
             listItem.appendChild(urlLink);
             // Add the list item to the list
             parentNode.appendChild(listItem);
             // Give the list item a id for distinction
-            listItem.setAttribute('id', `${i}`)
-            urlLink.setAttribute('id', `${i}`)
+            listItem.setAttribute('id', `${i}`);
+            urlLink.setAttribute('id', `${i}`);
             // Iterate variable for id
             i = i + 1;
-        }
-        
-        // If the node has children, recursively display them
-        if (node.children) {
-            const sublist = document.createElement('ul');
-            sublist.setAttribute('id', 'bookList')
-            parentNode.appendChild(sublist);
-            displayBookmarks(node.children, sublist);
         }
     }
 }
@@ -72,27 +70,28 @@ function filter(input) {
     let bookList = document.getElementById("bookList")
     if (filterSort != "") {
         for (let i = 0; i < bookList.children.length; i++) {
-            bookList.children[i].setAttribute('class', 'hidden')
+            bookList.children[i].setAttribute('id', 'hidden')
         }
         let filteredArray = document.querySelectorAll(`[class*=${filterSort}]`)
         for (let i = 0; i < filteredArray.length; i++) {
-            filteredArray[i].setAttribute('class', '')
+            filteredArray[i].setAttribute('id', '')
         }
     }
     else {
         for (let i = 0; i < bookList.children.length; i++) {
-            bookList.children[i].setAttribute('class', '')
+            bookList.children[i].setAttribute('id', '')
         }
     }
+    console.log(bookmarkListStore)
 }
+
 function deleteBookmark() {
-    console.log(this.parentNode.children[2].href)
     chrome.bookmarks.search({ url: url }, (results) => {
         for (const result of results) {
-          if (result.url === this.parentNode.children[2].href) {
-            chrome.bookmarks.remove(result.id, () => { });
-          }
+            if (result.url === this.parentNode.children[3].href) {
+                chrome.bookmarks.remove(result.id, () => { });
+            }
         }
         location.reload();
-      });
+    });
 }

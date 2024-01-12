@@ -18,10 +18,14 @@ li {
 }
 
 .delButton {
-  display: inline-block;
   position: relative;
   padding: 0%;
-  margin-left: 2%;
+  margin-right: 2%;
+}
+
+.tagList {
+  float: right;
+  margin-right: 2%;
 }
 
 li:nth-child(odd) {
@@ -37,6 +41,6 @@ p {
   margin: 0;
 }
 
-.hidden {
+#hidden {
   display: none;
 }

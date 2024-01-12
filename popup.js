@@ -2,6 +2,7 @@
 // Get the bookmarks and display them in the popup
 let url
 let title
+let tagsArr
 
 async function getCurrentTab() {
   let queryOptions = { active: true, lastFocusedWindow: true };
@@ -15,46 +16,18 @@ chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
   title = tabs[0].title;
 });
 
-chrome.bookmarks.getTree((tree) => {
-  const bookmarkList = document.getElementById('bookmarkList');
-  displayBookmarks(tree[0].children, bookmarkList);
-});
-
-// Recursively display the bookmarks
-function displayBookmarks(nodes, parentNode) {
-  for (const node of nodes) {
-    // If the node is a bookmark, create a list item and append it to the parent node
-    if (node.url) {
-      updateStorage(nodes)
-      const listItem = document.createElement('li');
-      const listLink = document.createElement('a');
-      // Set some attributes
-      listLink.href = node.url;
-      listLink.target = "_blank"
-      listItem.textContent = node.title;
-      // Append the child
-      listLink.appendChild(listItem);
-      parentNode.appendChild(listLink);
-    }
-
-    // If the node has children, recursively display them
-    if (node.children) {
-      const sublist = document.createElement('ul');
-      parentNode.appendChild(sublist);
-      displayBookmarks(node.children, sublist);
-    }
-  }
-}
-
 // Add a bookmark for current page
 function addBookmark() {
+  tagsArr = document.getElementById('tagsListed').value
   chrome.bookmarks.create(
     {
       parentId: '1',
       title: title,
-      url: url
+      url: url,
     },
-    () => {
+    (result) => {
+      result.tags = tagsArr
+      updateStorage(result)
       location.reload(); // Refresh the popup
     }
   );
@@ -76,26 +49,32 @@ function removeBookmark() {
 document.getElementById('addButton').addEventListener('click', addBookmark);
 document.getElementById('removeButton').addEventListener('click', removeBookmark);
 document.getElementById('newTab').addEventListener('click', newTab)
+document.getElementById('addTags').addEventListener('click', addBookmark);
 
 function newTab() {
   chrome.tabs.create({ url: './tab.html' });
 }
 
 async function updateStorage(bookmark) {
+  // bookmark = {bookmark: bookmark, "tags" : tags}
   let bookmark_id = bookmark.id
   let bookmarkListStore
-  chrome.storage.sync.get('bookmarkListStore', function(bmks) {
+  // bookmark = bookmark + tags
+  chrome.storage.sync.get('bookmarkListStore', function (bmks) {
     // check if data exists.
     if (bmks) {
-        bookmarkListStore = bmks.bookmarkListStore;
+      bookmarkListStore = bmks.bookmarkListStore;
+      bookmarkListStore.push(bookmark);
+      chrome.storage.sync.set({ "bookmarkListStore": bookmarkListStore });
     }
   });
   if (Array.isArray(bookmarkListStore)) {
-    bookmarkListStore.push(bookmark_id);
-    await chrome.storage.sync.set({ "bookmarkListStore": bookmarkListStore });
-    await chrome.storage.sync.set({ bookmark_id: bookmark_data })
+
   }
-  else {
-    await chrome.storage.sync.set({ "bookmarkListStore": bookmark });
-  }
+  // else {
+  //   chrome.bookmarks.getTree((tree) => {
+  //     let nodes = tree[0].children;
+  //     chrome.storage.sync.set({"bookmarkListSore": nodes})
+  //   });
+  // }
 }
