@@ -10,11 +10,8 @@ chrome.storage.sync.get('bookmarkListStore', function (bmks) {
     if (bmks) {
         bookmarkListStore = bmks.bookmarkListStore;
         console.log(bookmarkListStore)
+        displayBookmarks(bookmarkListStore, bookmarkList)
     }
-});
-
-chrome.bookmarks.getTree((tree) => {
-    displayBookmarks(tree[0].children, bookmarkList);
 });
 
 // Recursively display the bookmarks
@@ -28,7 +25,7 @@ function displayBookmarks(nodes, parentNode) {
             const listText = document.createElement('span');
             const delButton = document.createElement('button');
             const urlLink = document.createElement('a');
-            const tagList = document.createElement('span')
+            const tagList = document.createElement('span');
             // Give them CSS identifiers
             listText.className = "listText";
             urlLink.className = "urlLink";
@@ -67,10 +64,9 @@ document.getElementById('filterBy').addEventListener('keyup', filter)
 
 function filter(input) {
     let filterSort = input.target.value
-    let bookList = document.getElementById("bookList")
     if (filterSort != "") {
-        for (let i = 0; i < bookList.children.length; i++) {
-            bookList.children[i].setAttribute('id', 'hidden')
+        for (let i = 0; i < bookmarkList.children.length; i++) {
+            bookmarkList.children[i].setAttribute('id', 'hidden')
         }
         let filteredArray = document.querySelectorAll(`[class*=${filterSort}]`)
         for (let i = 0; i < filteredArray.length; i++) {
@@ -78,18 +74,20 @@ function filter(input) {
         }
     }
     else {
-        for (let i = 0; i < bookList.children.length; i++) {
-            bookList.children[i].setAttribute('id', '')
+        for (let i = 0; i < bookmarkList.children.length; i++) {
+            bookmarkList.children[i].setAttribute('id', '')
         }
     }
-    console.log(bookmarkListStore)
 }
 
 function deleteBookmark() {
     chrome.bookmarks.search({ url: url }, (results) => {
         for (const result of results) {
             if (result.url === this.parentNode.children[3].href) {
-                chrome.bookmarks.remove(result.id, () => { });
+                bookmarkListStore.splice(this.parentNode.id, 1);
+                this.parentNode.parentNode.removeChild(this.parentNode);
+                chrome.storage.sync.set({ "bookmarkListStore": bookmarkListStore });
+                chrome.bookmarks.remove(result.id, () => {});
             }
         }
         location.reload();
